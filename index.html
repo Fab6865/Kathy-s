@@ -1,0 +1,176 @@
+<html><head><base href="https://kathysbrainworkout.com/" />
+  <title>Kathy's Brain Workout - Emoji Cubby Sorting Game</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background-color: #ffd1dc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .game-container {
+      background-color: #fff;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+    h1 {
+      color: #ff69b4;
+      text-align: center;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+    .cubbies {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+    .cubby {
+      border: 3px solid #ff69b4;
+      border-radius: 15px;
+      padding: 15px;
+      text-align: center;
+      background-color: #fffaf0;
+    }
+    .emoji {
+      display: inline-block;
+      font-size: 50px;
+      margin: 5px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .emoji:hover {
+      transform: scale(1.2);
+    }
+    .selected {
+      box-shadow: 0 0 0 5px #ff1493;
+      border-radius: 50%;
+    }
+    #message {
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #ff1493;
+    }
+    #reset {
+      display: block;
+      margin: 20px auto;
+      padding: 15px 30px;
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 1.2em;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+    #reset:hover {
+      background-color: #ff1493;
+    }
+    #hint {
+      text-align: center;
+      margin-top: 15px;
+      font-style: italic;
+      color: #ff69b4;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>Kathy's Brain Workout</h1>
+    <p>Flex those brain muscles! Swap emojis between cubbies and sort them all!</p>
+    <div class="cubbies" id="cubbies"></div>
+    <div id="message"></div>
+    <div id="hint">Hint: Try to group the pineapples together!</div>
+    <button id="reset">Shuffle and Play Again!</button>
+  </div>
+
+  <script>
+    const emojis = ['🍎', '🍌', '🍊', '🍇', '🍓', '🍉', '🍍', '🥑', '🍒'];
+    let selectedEmoji = null;
+    let cubbies = [];
+
+    function createCubbies() {
+      const cubbiesContainer = document.getElementById('cubbies');
+      cubbiesContainer.innerHTML = '';
+      cubbies = [];
+
+      let allEmojis = emojis.flatMap(emoji => Array(3).fill(emoji));
+      
+      for (let i = allEmojis.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allEmojis[i], allEmojis[j]] = [allEmojis[j], allEmojis[i]];
+      }
+
+      for (let i = 0; i < 9; i++) {
+        const cubby = document.createElement('div');
+        cubby.className = 'cubby';
+        
+        const cubbyEmojis = [];
+        for (let j = 0; j < 3; j++) {
+          const emojiSpan = document.createElement('span');
+          emojiSpan.className = 'emoji';
+          emojiSpan.textContent = allEmojis[i * 3 + j];
+          emojiSpan.addEventListener('click', () => selectEmoji(emojiSpan, i, j));
+          cubby.appendChild(emojiSpan);
+          cubbyEmojis.push(emojiSpan);
+        }
+        
+        cubbiesContainer.appendChild(cubby);
+        cubbies.push(cubbyEmojis);
+      }
+    }
+
+    function selectEmoji(emojiSpan, cubbyIndex, emojiIndex) {
+      if (selectedEmoji === null) {
+        selectedEmoji = { span: emojiSpan, cubbyIndex, emojiIndex };
+        emojiSpan.classList.add('selected');
+      } else {
+        if (selectedEmoji.span !== emojiSpan) {
+          const tempEmoji = selectedEmoji.span.textContent;
+          selectedEmoji.span.textContent = emojiSpan.textContent;
+          emojiSpan.textContent = tempEmoji;
+
+          selectedEmoji.span.classList.remove('selected');
+          selectedEmoji = null;
+
+          checkWinCondition();
+        } else {
+          selectedEmoji.span.classList.remove('selected');
+          selectedEmoji = null;
+        }
+      }
+    }
+
+    function checkWinCondition() {
+      const win = cubbies.every(cubby => 
+        cubby.every((emojiSpan, _, arr) => 
+          emojiSpan.textContent === arr[0].textContent
+        )
+      );
+
+      if (win) {
+        document.getElementById('message').textContent = 'Woohoo! Your brain is on fire! You sorted all the cubbies!';
+      }
+    }
+
+    function resetGame() {
+      createCubbies();
+      document.getElementById('message').textContent = '';
+      document.getElementById('hint').textContent = 'Hint: Try to group the pineapples together!';
+    }
+
+    document.getElementById('reset').addEventListener('click', resetGame);
+
+    createCubbies();
+
+    // Simulate the click on the pineapple emoji
+    document.querySelector('.emoji[textContent="🍍"]').click();
+    document.getElementById('message').textContent = "Great start! You've selected a pineapple. Now try to find another cubby with a pineapple and click on it to swap!";
+    document.getElementById('hint').textContent = "Remember, your goal is to get all three pineapples in the same cubby!";
+  </script>
+</body></html>
